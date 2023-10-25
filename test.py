@@ -16,13 +16,9 @@ print(w_1_namelist)
 for name in w_1_namelist:
     untimely_catalogs.append(stilts.tread(name))
 
-# columns_to_keep = ['ra','dec','flux','dflux','MJDMEAN']
 
 for i in range(0,len(untimely_catalogs)):
     untimely_catalogs[i] = untimely_catalogs[i].cmd_select('qf>0.9 && nm>=5').cmd_keepcols('ra dec flux dflux MJDMEAN')
-
-# print(untimely_catalogs[0])
-# print(all_wise_cat)
 
 tables_in = {}
 for i, catalog in enumerate(untimely_catalogs):
@@ -38,7 +34,7 @@ cols_to_discard = ''
 for i in range(0,len(untimely_catalogs)):
     cols_to_discard += 'ra_%d dec_%d '%(i+2, i+2)
 
-# print(cols_to_discard)
+
 
 tm.cmd_delcols(cols_to_discard.strip()).write('matched.csv')
 print('ok')

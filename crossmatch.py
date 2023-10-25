@@ -1,0 +1,63 @@
+import glob
+import re
+import stilts
+
+
+def one_footprint_crossmatch(name,long_name):
+    all_wise_cat = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_ac51.csv')
+    w1_untimely_catalogs = []
+    w2_untimely_catalogs = []
+    w1_namelist = glob.glob('./untimely-catalog/'+name+'/'+long_name+'/'+long_name+'_w1_*.gz')
+    w2_namelist = glob.glob('./untimely-catalog/'+name+'/'+long_name+'/'+long_name+'_w2_*.gz')
+    w1_namelist.sort()
+    w2_namelist.sort()
+    for w1_name in w1_namelist:
+        w1_untimely_catalogs.append(stilts.tread(w1_name))
+    for w2_name in w2_namelist:
+        w2_untimely_catalogs.append(stilts.tread(w2_name))
+    for i in range(0,len(w1_untimely_catalogs)):
+        w1_untimely_catalogs[i] = w1_untimely_catalogs[i].cmd_select('qf>0.9 && nm>=5').cmd_keepcols('ra dec flux dflux MJDMEAN')
+    for i in range(0,len(w2_untimely_catalogs)):
+        w2_untimely_catalogs[i] = w2_untimely_catalogs[i].cmd_select('qf>0.9 && nm>=5').cmd_keepcols('ra dec flux dflux MJDMEAN')
+
+    w1_tables_in = {}
+    for i, catalog in enumerate(w1_untimely_catalogs):
+        w1_tables_in['in%d'%(i+2)] = catalog
+    for i in range(0,len(w1_untimely_catalogs)+1):
+        w1_tables_in['values%d'%(i+1)] = 'ra dec'    
+    
+    w2_tables_in = {}
+    for i, catalog in enumerate(w2_untimely_catalogs):
+        w2_tables_in['in%d'%(i+2)] = catalog
+    for i in range(0,len(w2_untimely_catalogs)+1):
+        w2_tables_in['values%d'%(i+1)] = 'ra dec'  
+
+    w1_tm = stilts.tmatchn(nin = len(w1_untimely_catalogs)+1,
+                    matcher='sky', params=3, progress='time',
+                    in1=all_wise_cat,suffix1='',**w1_tables_in)
+    w1_cols_to_discard = ''
+    for i in range(0,len(w1_untimely_catalogs)):
+       w1_cols_to_discard += 'ra_%d dec_%d '%(i+2, i+2)
+    w1_tm.cmd_delcols(w1_cols_to_discard.strip()).write('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w1_mached.csv')
+
+    w2_tm = stilts.tmatchn(nin = len(w2_untimely_catalogs)+1,
+                    matcher='sky', params=3, progress='time',
+                    in1=all_wise_cat,suffix1='',**w2_tables_in)
+    w2_cols_to_discard = ''
+    for i in range(0,len(w2_untimely_catalogs)):
+       w2_cols_to_discard += 'ra_%d dec_%d '%(i+2, i+2)
+    w2_tm.cmd_delcols(w2_cols_to_discard.strip()).write('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w2_mached.csv')
+
+
+
+if __name__=='__main__':
+    first_layer_names = glob.glob('./mached_catalog/[0-9][0-9][0-9]')
+    count = 0
+    for proto_name in first_layer_names:
+        name = re.search('\d\d\d',proto_name).group(0)
+        second_layer_names = glob.glob('./mached_catalog/'+name+'/[0-9][0-9][0-9][0-9]*',)
+        for proto_long_name in second_layer_names:
+            long_name = re.search('\d\d\d\d(m|p)\d\d\d',proto_long_name).group(0)
+            one_footprint_crossmatch(name,long_name)
+            count += 1
+            print('crossmatch finished for %s, %d/18240 finished'%(long_name,count))

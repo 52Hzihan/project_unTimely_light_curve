@@ -3,6 +3,7 @@ test_data/
 mached_catalog/
 untimely-catalog/
 ipac/
+*.jar
 jystilts.jar
 stilts.jar
 stilts

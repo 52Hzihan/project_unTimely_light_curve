@@ -2,6 +2,7 @@ tempfiles/
 test_data/
 mached_catalog/
 untimely-catalog/
+ipac/
 jystilts.jar
 stilts.jar
 stilts

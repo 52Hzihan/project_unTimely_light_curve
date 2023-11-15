@@ -39,3 +39,7 @@ for i in range(0,len(untimely_catalogs)):
 tm.cmd_delcols(cols_to_discard.strip()).write('matched.csv')
 print('ok')
 
+
+
+import matplotlib.pyplot as plt
+

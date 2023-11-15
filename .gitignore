@@ -4,6 +4,8 @@ mached_catalog/
 untimely-catalog/
 ipac/
 *.jar
+*.csv
+*.xml
 jystilts.jar
 stilts.jar
 stilts

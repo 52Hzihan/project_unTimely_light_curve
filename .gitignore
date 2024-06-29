@@ -2,7 +2,9 @@ tempfiles/
 test_data/
 mached_catalog/
 untimely-catalog/
+extra_catalogues/
 ipac/
+total_catalogues/
 *.jar
 *.csv
 *.xml

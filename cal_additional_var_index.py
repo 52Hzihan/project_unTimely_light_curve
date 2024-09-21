@@ -106,27 +106,29 @@ def one_footprint_cal(name,long_name,band):
     for i in range(0,len(table)):
         ra, dec, mag, error, mjdmean, flux, dflux = make_single_light_curve(table,i)
         if len(mag)>=10:
-            chi_squre = 0
-            mean_mag = np.mean(mag)
-            for magi,errori in zip(mag,error):
-                chi_squre += ((magi-mean_mag)/errori)**2
-            rcs = reduced_chi_Square(flux,dflux)
-            w_sigma = weighted_sigma(mag,error)
-            MAD = Median_absolute_deviation(mag)
-            IQR = Interquartile_range(mag)
-            RmStat = Robust_median_statistic(mag,error)
-            Nev = Normalized_excess_variance(mag,error)
-            p2pv = Peak_to_peak_variability(mag,error)
-            L1_acr = Lag_1_autocorrelation(mag,error)
-            J = Stetson_J(mag,error)
-            K = Stetson_K(mag,error)           
-            yta = yita(mag,error)
-            
-            result_line = np.array([i,ra,dec,mean_mag,chi_squre,rcs,w_sigma,MAD,IQR,RmStat,Nev,p2pv,L1_acr,J,K,yta])
+            try:
+                chi_squre = 0
+                mean_mag = np.mean(mag)
+                for magi,errori in zip(mag,error):
+                    chi_squre += ((magi-mean_mag)/errori)**2
+                rcs = reduced_chi_Square(flux,dflux)
+                w_sigma = weighted_sigma(mag,error)
+                MAD = Median_absolute_deviation(mag)
+                IQR = Interquartile_range(mag)
+                RmStat = Robust_median_statistic(mag,error)
+                Nev = Normalized_excess_variance(mag,error)
+                p2pv = Peak_to_peak_variability(mag,error)
+                L1_acr = Lag_1_autocorrelation(mag,error)
+                J = Stetson_J(mag,error)
+                K = Stetson_K(mag,error)           
+                yta = yita(mag,error)
+            except:
+                continue
+            result_line = np.array([long_name,i,ra,dec,mean_mag,chi_squre,rcs,w_sigma,MAD,IQR,RmStat,Nev,p2pv,L1_acr,J,K,yta])
             result_list.append(result_line)
-
     
-    result_table = pd.DataFrame(np.array(result_list),columns=['id_in_matched','ra','dec','Mean','chi_squre','rcs','w_sigma','MAD','IQR','RmStat','Nev','p2pv','L1_acr','Stetson_J','Stetson_K','yita'])
+    
+    result_table = pd.DataFrame(np.array(result_list),columns=['long_name','id_in_matched','ra','dec','Mean','chi_squre','rcs','w_sigma','MAD','IQR','RmStat','Nev','p2pv','L1_acr','Stetson_J','Stetson_K','yita'])
     result_table.to_csv('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_'+ band +'_new_features.csv')
     end = time.time()
     print('Task %s runs %0.2f seconds.' % (long_name, (end - start)))
@@ -146,7 +148,8 @@ for name in first_layer_names:
         for long_name in second_layer_names:
             for band in ('w1', 'w2'):
                 if True == os.path.isfile('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_'+ band +'_mached.csv'):
-                    thread_pool.apply_async(one_footprint_cal,args=(name,long_name,band))
+                    if True != os.path.isfile('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_'+ band +'_new_features.csv'):
+                        thread_pool.apply_async(one_footprint_cal,args=(name,long_name,band))
 print('Waiting for all subprocesses done...')
 thread_pool.close()
 thread_pool.join()

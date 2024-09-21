@@ -48,7 +48,20 @@ def one_footprint_crossmatch(name,long_name):
        w2_cols_to_discard += 'ra_%d dec_%d '%(i+2, i+2)
     w2_tm.cmd_delcols(w2_cols_to_discard.strip()).write('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w2_mached.csv')
 
+def one_footprint_2band_crossmatch(name,long_name):
+    w1_table = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w1_mached.csv')
+    w2_table = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w2_mached.csv')
+    w1_table = w1_table.cmd_keepcols('ra dec ')
+    w2_table = w2_table.cmd_keepcols('ra dec ')
+    w1_table = w1_table.cmd_addcol('id_w1', 'toInteger($0)')  # id starts from 1
+    w2_table = w2_table.cmd_addcol('id_w2', 'toInteger($0)')
+    tm = stilts.tmatch2(in1=w1_table, in2=w2_table, matcher='sky', 
+                        params=3, values1='ra dec', values2='ra dec')
+    tm = tm.cmd_keepcols('id_w1 id_w2')
+    tm.write('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_mached_2band.csv')
+
 if __name__=='__main__':
     name = sys.argv[1]
     long_name = sys.argv[2]
-    one_footprint_crossmatch(name,long_name)
+    # one_footprint_crossmatch(name,long_name)
+    one_footprint_2band_crossmatch(name,long_name)

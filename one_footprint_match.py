@@ -60,8 +60,25 @@ def one_footprint_2band_crossmatch(name,long_name):
     tm = tm.cmd_keepcols('id_w1 id_w2')
     tm.write('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_mached_2band.csv')
 
+
+def one_footprint_corelation_crossmatch(name,long_name):
+    w1_para_table = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w1_new_features.csv')
+    w2_para_table = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w2_new_features.csv')
+    w1_para_table = w1_para_table.cmd_keepcols('ra dec Mean')
+    w2_para_table = w2_para_table.cmd_keepcols('ra dec Mean')
+    corelation_table = stilts.tread('./mached_catalog/'+name+'/'+long_name+'/'+long_name+'_corelation.csv')
+    tm1 = stilts.tmatch2(in1=w1_para_table, in2=corelation_table, matcher='sky', 
+                        params=3, values1='ra dec', values2='ra1 dec1 ')
+    tm2 = stilts.tmatch2(in1=w2_para_table, in2=corelation_table, matcher='sky', 
+                        params=3, values1='ra dec', values2='ra2 dec2 ')
+    tm3 = stilts.tmatch2(in1=tm1, in2=tm2, matcher='exact', values1='id_w1', values2='id_w1')
+    tm1.write('/data/project_unTimely_light_curve/mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w1_corelation_with_Mean.csv')
+    tm2.write('/data/project_unTimely_light_curve/mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w2_corelation_with_Mean.csv')
+    tm3.write('/data/project_unTimely_light_curve/mached_catalog/'+name+'/'+long_name+'/'+long_name+'_w1_w2_corelation_with_Mean.csv')
+
 if __name__=='__main__':
     name = sys.argv[1]
     long_name = sys.argv[2]
     # one_footprint_crossmatch(name,long_name)
-    one_footprint_2band_crossmatch(name,long_name)
+    # one_footprint_2band_crossmatch(name,long_name)
+    one_footprint_corelation_crossmatch(name,long_name)

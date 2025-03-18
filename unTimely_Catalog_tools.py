@@ -195,7 +195,7 @@ class unTimelyCatalogExplorer:
             'selcols': 'w1mpro_ep,w1sigmpro_ep,w2mpro_ep,w2sigmpro_ep,mjd,qi_fact,saa_sep,moon_masked'
         }
         r = requests.get(query_url, params=payload)
-        allwise = ascii.read(r.text)
+        allwise = ascii.read(r.text, guess=False, format='ipac')
 
         payload = {
             'catalog': 'neowiser_p1bs_psd',
@@ -207,7 +207,7 @@ class unTimelyCatalogExplorer:
             'selcols': 'w1mpro,w1sigmpro,w2mpro,w2sigmpro,mjd,qi_fact,saa_sep,moon_masked,qual_frame'
         }
         r = requests.get(query_url, params=payload)
-        neowise = ascii.read(r.text)
+        neowise = ascii.read(r.text, guess=False, format='ipac')
 
         # Apply quality constraints
         """
@@ -717,7 +717,7 @@ class unTimelyCatalogExplorer:
                 forward = w1_overlay[2]
                 imageW1 = self.get_neowise_image(ra, dec, epoch, 1, img_size)
                 if not imageW1:
-                    break
+                    continue
                 hdu = imageW1[0]
                 header = hdu.header
                 meanmjd = (header['MJDMIN']+header['MJDMAX'])/2
@@ -726,6 +726,8 @@ class unTimelyCatalogExplorer:
                 print('A problem occurred while creating WISE time series for object ra={ra}, dec={dec}, epoch={epoch}, band=1'
                       .format(ra=ra, dec=dec, epoch=epoch))
                 print(traceback.format_exc())
+
+        print(len(images))
 
         # Process W1 images
         self.w1_images = []
@@ -759,7 +761,7 @@ class unTimelyCatalogExplorer:
                 forward = w2_overlay[2]
                 imageW2 = self.get_neowise_image(ra, dec, epoch, 2, img_size)
                 if not imageW2:
-                    break
+                    continue
                 hdu = imageW2[0]
                 header = hdu.header
                 meanmjd = (header['MJDMIN']+header['MJDMAX'])/2

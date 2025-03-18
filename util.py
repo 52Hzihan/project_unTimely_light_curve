@@ -226,3 +226,35 @@ def neowise_viewer_show(path, ra, dec, outlier_remove=False):
     plt.errorbar(t_w2_bin,mag_w2_bin,mag_err_w2_bin, fmt='o',ms=4, mfc='r', elinewidth=1, capsize=2)
     plt.title('w2_bin')
     plt.show()
+
+import numpy as np
+
+def calculate_magnitude(flux):
+    if flux <= 0:
+        return np.nan
+    return 22.5 - 2.5 * np.log10(flux)
+
+def calculate_error(flux,dflux):
+    mag_upper = calculate_magnitude(flux - dflux)
+    mag_lower = calculate_magnitude(flux + dflux)
+    dmag = (mag_upper - mag_lower) / 2
+    return dmag
+
+cal_mag_ufunc  = np.frompyfunc(calculate_magnitude,1,1)
+cal_error_ufunc  = np.frompyfunc(calculate_error,2,1)
+
+def make_single_light_curve(table, index):
+    line = table.iloc[index]
+    line_len = len(line)
+    ra = line[0]
+    dec = line[1]
+    flux_unfiltered = line[3:line_len:3]
+    flux = np.array(flux_unfiltered[flux_unfiltered.notnull()])
+    dflux_unfiltered = line[4:line_len:3]
+    dflux = np.array(dflux_unfiltered[dflux_unfiltered.notnull()])
+    mjdmean_unfiltered = line[5:line_len:3]
+    mjdmean = np.array(mjdmean_unfiltered[mjdmean_unfiltered.notnull()])
+    assert len(flux)==len(dflux) and len(dflux)==len(mjdmean), 'light curve uncomplete!'
+    mag = cal_mag_ufunc(flux)
+    error = cal_error_ufunc(flux,dflux)
+    return ra,dec,mag, error, mjdmean

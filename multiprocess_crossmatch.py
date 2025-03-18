@@ -39,12 +39,14 @@ if __name__=='__main__':
     # # print('error count is:',error_count)
 
     thread_pool = Pool()
-    for sub in np.arange(14.3,15.0,0.1):
+    for sub in np.arange(7.7,18.9,0.1):
         print(sub)
+        
         thread_pool.apply_async(one_bin_match,args=(sub,sub+0.1))
         
+        
 
-    print('Waiting for all subprocesses done...')
+    # print('Waiting for all subprocesses done...')
     thread_pool.close()
     thread_pool.join()
-    print('all subprocesses done')
+    # print('all subprocesses done')

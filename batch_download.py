@@ -98,9 +98,14 @@ def batch_download(path, ras, decs):
 
 
 if __name__ == '__main__':
-    path = './ipac/r90_Eta_e_above_7/'
-    df = pd.read_csv('./total_catalogues/r90_Eta_e_above_7.csv')
-    ras = df['RAdeg']
-    decs = df['DEdeg']
+    # path = './ipac/r90_Eta_e_above_7/'
+    path = './ipac/std_pho_sample5000/'
+    # df = pd.read_csv('./total_catalogues/r90_Eta_e_above_7.csv')
+
+    df = pd.read_csv('./sample5000_std_pho.csv')
+    # ras = df['RAdeg']
+    # decs = df['DEdeg']
+    ras = df['ra_1']
+    decs = df['dec_1']
     batch_download(path, ras, decs)
                             
